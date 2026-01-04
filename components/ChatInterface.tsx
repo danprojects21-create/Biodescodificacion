@@ -111,4 +111,69 @@ const ChatInterface: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.191 6.09l4.744 2.372a2.25 2.25 0 011.065 2.571L18.96 17.5a2.25 2.25 0 01-2.025 1.5h-9.87a2.25 2.25 0 01-2.025-1.5l-2.04-6.467a2.25 2.25 0 011.065-2.57l4.744-2.373a2.25 2.25 0 012.36 0l4.744 2.373z" />
               </svg>
             </div>
-            <h3 className="text-3xl serif text-slate-80
+            <h3 className="text-3xl serif text-slate-800 font-bold mb-3">Tu Bienestar Comienza Aquí</h3>
+            <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
+              Describe lo que sientes o el **<u>síntoma</u>** que te preocupa. Juntos exploraremos su raíz simbólica con paciencia y conciencia.
+            </p>
+          </div>
+        )}
+        {messages.map((m) => (
+          <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-${m.role === 'user' ? 'right' : 'left'}-4 duration-300`}>
+            <div className={`max-w-[80%] rounded-[1.5rem] p-5 shadow-lg border transition-all ${
+              m.role === 'user' 
+              ? 'bg-teal-700 text-white border-teal-600 rounded-tr-none' 
+              : 'bg-white border-slate-200 text-slate-800 rounded-tl-none'
+            }`}>
+              <div className="whitespace-pre-wrap text-[15px] leading-relaxed">
+                {m.role === 'model' ? renderFormattedText(m.text) : m.text}
+              </div>
+              <div className={`text-[10px] mt-3 opacity-60 font-bold uppercase tracking-widest flex items-center ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-md rounded-tl-none">
+              <div className="flex space-x-1.5">
+                <div className="w-2.5 h-2.5 bg-teal-400 rounded-full animate-bounce"></div>
+                <div className="w-2.5 h-2.5 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2.5 h-2.5 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 bg-white border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+        <div className="max-w-4xl mx-auto">
+          <VoicePlayer base64Audio={currentTts} onFinished={() => setCurrentTts(null)} />
+          <div className="flex items-center space-x-3 mt-3">
+            <div className="relative flex-1 group">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Escribe tu mensaje aquí..."
+                className="w-full p-4 pl-6 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-teal-500 transition-all text-[15px] placeholder:text-slate-400"
+              />
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={loading}
+              className="bg-teal-800 text-white p-4 rounded-2xl hover:bg-teal-700 transition-all shadow-lg disabled:opacity-50 active:scale-95 shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatInterface;
