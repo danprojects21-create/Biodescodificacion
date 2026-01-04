@@ -5,20 +5,20 @@ export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Usamos la variable de entorno que ya tienes en Vercel
+    // Usamos la variable de entorno que ya tienes configurada en Vercel
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
 
   async chat(message: string, history: any[] = []) {
     try {
-      // Configuramos el modelo real y estable
+      // Usamos el modelo real y estable para evitar errores de conexión
       const model = this.genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
         systemInstruction: SYSTEM_INSTRUCTION 
       });
 
-      // ESTO ELIMINA EL BLOQUEO DE SEGURIDAD
+      // ESTO ELIMINA EL BLOQUEO DE SEGURIDAD PARA BIODESCODIFICACIÓN
       const safetySettings = [
         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -38,11 +38,11 @@ export class GeminiService {
       return result.response.text();
     } catch (error) {
       console.error("Error en Gemini:", error);
-      return "Hubo un error de conexión. Por favor, intenta de nuevo en unos segundos.";
+      return "Hubo un error de conexión con el acompañante. Por favor, intenta de nuevo en unos segundos.";
     }
   }
 
-  // Función de voz usando el navegador (más fiable que modelos experimentales)
+  // Función de voz simplificada que usa el navegador directamente
   async generateTTS(text: string) {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
