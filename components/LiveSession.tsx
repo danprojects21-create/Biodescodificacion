@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useRef } from 'react';
-import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
+import { GoogleGenerativeAI, LiveServerMessage, Modality } from '@google/generative-ai';
 
 const LiveSession: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
