@@ -1,0 +1,8 @@
+{
+  "name": "Sentir Conciencia - Acompañante de Bienestar",
+  "description": "Una aplicación profesional de acompañamiento emocional y biodescodificación simbólica que integra IA avanzada para la toma de conciencia y la reflexión profunda.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
