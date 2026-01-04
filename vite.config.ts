@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Esto soluciona la pantalla en blanco
+  base: './', 
   build: {
     outDir: 'dist',
     target: 'esnext'
