@@ -1,34 +1,33 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
 export class GeminiService {
   private ai: GoogleGenerativeAI;
 
   constructor() {
-    // Usamos el formato de Vite para leer tu variable VITE_GEMINI_API_KEY
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
     this.ai = new GoogleGenerativeAI(apiKey);
   }
 
   async chat(message: string) {
     try {
-      // Usamos gemini-1.5-flash: es el más estable para apps web rápidas
       const model = this.ai.getGenerativeModel({ 
-        model: "gemini-1.5-flash" 
+        model: "gemini-1.5-flash",
+        // Esto evita que Google bloquee tus respuestas de biodescodificación
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ]
       });
 
-      // Enviamos la instrucción de biodescodificación junto con el síntoma
-      const prompt = `${SYSTEM_INSTRUCTION}\n\nAnaliza el siguiente síntoma: ${message}`;
-      
+      const prompt = `${SYSTEM_INSTRUCTION}\n\nAnaliza desde la biodescodificación: ${message}`;
       const result = await model.generateContent(prompt);
-      const response = await result.response;
-      
-      // Retornamos solo el texto para que aparezca en la burbuja de chat
-      return response.text();
-      
+      return result.response.text();
     } catch (error) {
-      console.error("Error en la conexión con la IA:", error);
-      return "Lo siento, tuve un problema al conectar. Por favor, verifica tu conexión o intenta de nuevo.";
+      console.error("Error:", error);
+      return "Hubo un ajuste de seguridad. Por favor, intenta de nuevo con términos más simples.";
     }
   }
 }
