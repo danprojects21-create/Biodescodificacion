@@ -25,11 +25,10 @@ export class GeminiService {
         }))
       });
 
-      const result = await chatSession.sendMessage(message);
-      return result.response;
+     const result = await chatSession.sendMessage(message);
+      // CAMBIO AQUÍ: Agregamos .text() para extraer solo el mensaje
+      return result.response.text(); 
     } catch (error) {
-      console.error("Error en GeminiService:", error);
-      throw error;
     }
   }
 }
