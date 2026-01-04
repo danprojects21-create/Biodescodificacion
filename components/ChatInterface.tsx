@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { gemini } from '../services/geminiService';
 import { ChatMessage } from '../types';
@@ -17,11 +18,16 @@ const ChatInterface: React.FC = () => {
   }, [messages]);
 
   const renderFormattedText = (text: string) => {
-    let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/<u>(.*?)<\/u>/g, '<u class="decoration-teal-500 font-bold">$1</u>');
+    // Reemplazamos cualquier residuo de asteriscos por si el modelo falla, 
+    // pero priorizamos las etiquetas que el modelo enviará según el sistema.
+    const cleanText = text
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\*(.*?)\*/g, '<i>$1</i>');
     
-    return <div dangerouslySetInnerHTML={{ __html: formatted }} />;
+    return <div 
+      className="prose prose-slate max-w-none"
+      dangerouslySetInnerHTML={{ __html: cleanText }} 
+    />;
   };
 
   const handleSend = async () => {
@@ -35,34 +41,33 @@ const ChatInterface: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMsg]);
-    const currentInput = input;
     setInput('');
     setLoading(true);
 
     try {
-      // Llamada directa al servicio que ya arreglamos
-      const responseText = await gemini.chat(currentInput);
+      const history = messages.map(m => ({
+        role: m.role,
+        parts: [{ text: m.text }]
+      }));
+
+      const result = await gemini.chat(input, history);
+      const fullText = result.text || "Lo siento, no pude procesar la respuesta.";
       
       const modelMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: responseText || "No recibí respuesta.",
+        text: fullText,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, modelMsg]);
 
-      // Intento de voz (TTS)
-      if (responseText.includes("**VERSIÓN PARA VOZ**")) {
-        const voiceMatch = responseText.split(/\*\*VERSIÓN PARA VOZ\*\*[:\-]?/i);
-        if (voiceMatch.length > 1) {
-          const voiceText = voiceMatch[1].trim();
-          // Solo si existe la función en tu servicio
-          if (typeof gemini.generateTTS === 'function') {
-            const ttsData = await gemini.generateTTS(voiceText);
-            if (ttsData) setCurrentTts(ttsData);
-          }
-        }
+      // Buscar versión voz sin asteriscos
+      const voiceMatch = fullText.split(/<b>VERSIÓN PARA VOZ<\/b>/i);
+      if (voiceMatch.length > 1) {
+        const voiceText = voiceMatch[1].replace(/<[^>]*>/g, '').trim();
+        const ttsData = await gemini.generateTTS(voiceText);
+        if (ttsData) setCurrentTts(ttsData);
       }
     } catch (error) {
       console.error(error);
@@ -98,11 +103,7 @@ const ChatInterface: React.FC = () => {
 
       <div 
         ref={scrollRef} 
-        className="flex-1 overflow-y-auto p-6 space-y-6 relative"
-        style={{ 
-          backgroundColor: '#f8fafc',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66 3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm54 0c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM57 7c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-8 48c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM25 34c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm23 40c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-8-54c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm35 88c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM9 19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm86 6c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM40 62c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm44 5c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-56 22c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm7-80c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm90 39c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-4-17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-28 50c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-44-51c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm85 97c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-17-24c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-51-24c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z' fill='%235b8c85' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E")` 
-        }}
+        className="flex-1 overflow-y-auto p-6 space-y-6 relative bg-slate-50"
       >
         {messages.length === 0 && (
           <div className="text-center py-20 px-10 animate-in fade-in zoom-in duration-1000">
@@ -113,7 +114,7 @@ const ChatInterface: React.FC = () => {
             </div>
             <h3 className="text-3xl serif text-slate-800 font-bold mb-3">Tu Bienestar Comienza Aquí</h3>
             <p className="text-slate-500 max-w-lg mx-auto leading-relaxed">
-              Describe lo que sientes o el **<u>síntoma</u>** que te preocupa. Juntos exploraremos su raíz simbólica con paciencia y conciencia.
+              Describe lo que sientes o el <b><u>síntoma</u></b> que te preocupa. Juntos exploraremos su raíz simbólica con paciencia y conciencia.
             </p>
           </div>
         )}
@@ -170,6 +171,9 @@ const ChatInterface: React.FC = () => {
               </svg>
             </button>
           </div>
+          <p className="text-[10px] text-center text-slate-400 mt-4 font-medium uppercase tracking-[0.2em]">
+            Prioriza siempre tu salud física • Consulta a un profesional
+          </p>
         </div>
       </div>
     </div>

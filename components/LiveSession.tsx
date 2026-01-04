@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useRef } from 'react';
-import { GoogleGenerativeAI, LiveServerMessage } from '@google/generative-ai';
+import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 
 const LiveSession: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
@@ -81,7 +81,7 @@ const LiveSession: React.FC = () => {
             setTranscriptions(prev => [...prev, msg.serverContent!.outputTranscription!.text]);
           }
         },
-        onerror: (e) => console.error("Live Error", e),
+        onerror: (e) => console.error("Error en Sesión", e),
         onclose: () => setIsActive(false),
       },
       config: {
@@ -109,7 +109,7 @@ const LiveSession: React.FC = () => {
         <img 
           src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=2000" 
           className="w-full h-full object-cover blur-sm" 
-          alt="Ambient Background" 
+          alt="Ambiente Meditativo" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950" />
       </div>
@@ -166,7 +166,6 @@ const LiveSession: React.FC = () => {
           </div>
         </div>
 
-        {/* Live Subtitles / Transcription area */}
         <div className="mt-12 w-full max-w-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-[2rem] h-40 overflow-y-auto custom-scrollbar">
           <div className="flex items-center space-x-2 mb-3">
             <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-teal-400 animate-pulse' : 'bg-slate-600'}`} />

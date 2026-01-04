@@ -1,11 +1,14 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Esto soluciona la pantalla en blanco al usar rutas relativas
+  define: {
+    // Asegura que process.env esté disponible para la SDK de Gemini
+    'process.env': process.env
+  },
   build: {
-    outDir: 'dist',
     target: 'esnext'
   }
 });
