@@ -11,12 +11,11 @@ export class GeminiService {
 
   async chat(message: string, history: any[] = []) {
     try {
-      // Usamos 1.5-flash que es el estándar actual para apps rápidas
       const model = this.genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
       });
 
-      // CONFIGURACIÓN DE SEGURIDAD MÁXIMA PERMISIVIDAD (Igual al original)
+      // DESACTIVACIÓN TOTAL DE FILTROS (Igual que en tu programa original)
       const safetySettings = [
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -30,25 +29,21 @@ export class GeminiService {
           parts: [{ text: h.text || "" }],
         })),
         safetySettings,
-        generationConfig: {
-          maxOutputTokens: 1000,
-        }
       });
 
-      // Incluimos la instrucción del sistema aquí directamente para asegurar que se lea
-      const promptConInstruccion = `${SYSTEM_INSTRUCTION}\n\nUsuario: ${message}`;
+      // Enviamos la instrucción como parte del contexto para evitar bloqueos de sistema
+      const fullPrompt = `INSTRUCCIÓN: ${SYSTEM_INSTRUCTION}\n\nUSUARIO: ${message}`;
       
-      const result = await chatSession.sendMessage(promptConInstruccion);
+      const result = await chatSession.sendMessage(fullPrompt);
       return result.response.text();
     } catch (error) {
-      console.error("Error detallado:", error);
-      return "Hubo un ajuste de seguridad. Por favor, intenta con términos más simples.";
+      console.error("Error:", error);
+      return "Lo siento, el sistema de seguridad de Google detectó un término sensible. Por favor, intenta describir cómo te sientes en lugar de solo nombrar la enfermedad.";
     }
   }
 
   async generateTTS(text: string) {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Limpia audios anteriores
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
       window.speechSynthesis.speak(utterance);
