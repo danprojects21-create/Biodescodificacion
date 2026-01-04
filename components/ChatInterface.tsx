@@ -36,43 +36,43 @@ const ChatInterface: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMsg]);
+    const currentInput = input; // Guardamos el mensaje
     setInput('');
     setLoading(true);
 
     try {
-      const history = messages.map(m => ({
-        role: m.role,
-        parts: [{ text: m.text }]
-      }));
-
-      const result = await gemini.chat(input, history);
-      const fullText = result.text || "Lo siento, no pude procesar la respuesta.";
+      // Llamamos al servicio (solo pasamos el texto para evitar errores de historial)
+      const responseText = await gemini.chat(currentInput);
       
       const modelMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: fullText,
+        text: responseText || "No recibí respuesta del servidor.",
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, modelMsg]);
 
-      const voiceMatch = fullText.split(/\*\*VERSIÓN PARA VOZ\*\*[:\-]?/i);
-      if (voiceMatch.length > 1) {
+      // Procesamiento de voz (opcional, solo si el servicio TTS existe)
+      const voiceMatch = responseText.split(/\*\*VERSIÓN PARA VOZ\*\*[:\-]?/i);
+      if (voiceMatch.length > 1 && typeof gemini.generateTTS === 'function') {
         const voiceText = voiceMatch[1].trim();
         const ttsData = await gemini.generateTTS(voiceText);
         if (ttsData) setCurrentTts(ttsData);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error en ChatInterface:", error);
       setMessages(prev => [...prev, {
         id: 'err',
         role: 'model',
-        text: "Error al conectar con el acompañante. Intenta de nuevo.",
+        text: "Error al conectar. Por favor, verifica tu conexión o intenta de nuevo.",
         timestamp: new Date()
       }]);
     } finally {
       setLoading(false);
+    }
+  };
+  
     }
   };
 
