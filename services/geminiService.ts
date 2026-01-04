@@ -1,29 +1,27 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Usamos la variable de entorno que ya tienes configurada en Vercel
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
 
   async chat(message: string, history: any[] = []) {
     try {
-      // Usamos el modelo real y estable para evitar errores de conexión
+      // Usamos 1.5-flash que es el estándar actual para apps rápidas
       const model = this.genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
-        systemInstruction: SYSTEM_INSTRUCTION 
       });
 
-      // ESTO ELIMINA EL BLOQUEO DE SEGURIDAD PARA BIODESCODIFICACIÓN
+      // CONFIGURACIÓN DE SEGURIDAD MÁXIMA PERMISIVIDAD (Igual al original)
       const safetySettings = [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
       ];
 
       const chatSession = model.startChat({
@@ -32,19 +30,25 @@ export class GeminiService {
           parts: [{ text: h.text || "" }],
         })),
         safetySettings,
+        generationConfig: {
+          maxOutputTokens: 1000,
+        }
       });
 
-      const result = await chatSession.sendMessage(message);
+      // Incluimos la instrucción del sistema aquí directamente para asegurar que se lea
+      const promptConInstruccion = `${SYSTEM_INSTRUCTION}\n\nUsuario: ${message}`;
+      
+      const result = await chatSession.sendMessage(promptConInstruccion);
       return result.response.text();
     } catch (error) {
-      console.error("Error en Gemini:", error);
-      return "Hubo un error de conexión con el acompañante. Por favor, intenta de nuevo en unos segundos.";
+      console.error("Error detallado:", error);
+      return "Hubo un ajuste de seguridad. Por favor, intenta con términos más simples.";
     }
   }
 
-  // Función de voz simplificada que usa el navegador directamente
   async generateTTS(text: string) {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Limpia audios anteriores
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
       window.speechSynthesis.speak(utterance);
