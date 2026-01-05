@@ -30,7 +30,7 @@ export const gemini = {
     }
   },
 
-  // Funciones añadidas para que los otros archivos no den error
-  async generateSymbolicImage(p: string) { return ""; },
-  async generateMeditativeVideo(p: string) { return ""; }
+  // Agregamos estas funciones "vacías" para que los otros archivos no den error
+  async generateSymbolicImage(prompt: string) { return ""; },
+  async generateMeditativeVideo(prompt: string) { return ""; }
 };
