@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
 
 export const gemini = {
   async chat(message: string, history: any[] = []) {
@@ -16,7 +15,17 @@ export const gemini = {
       const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      return "Hubo un problema. Intenta de nuevo.";
+      console.error(error);
+      return "Lo siento, hubo un error de conexión.";
+    }
+  },
+  
+  async generateTTS(text: string) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      window.speechSynthesis.speak(utterance);
     }
   }
 };
