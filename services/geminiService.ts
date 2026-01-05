@@ -4,7 +4,7 @@ export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Vite usa import.meta.env en lugar de process.env
+    // Vite requiere VITE_ para las variables de entorno
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
@@ -21,12 +21,12 @@ export class GeminiService {
       const result = await chatSession.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      console.error(error);
-      return "Lo siento, hubo un error de conexión.";
+      console.error("Chat Error:", error);
+      return "Hubo un ajuste de seguridad. Por favor, intenta de nuevo.";
     }
   }
 
-  // Funciones necesarias para que CreativeTools no falle
+  // Estas funciones vacías evitan que CreativeTools.tsx rompa el programa
   async generateSymbolicImage(prompt: string) { return ""; }
   async generateMeditativeVideo(prompt: string) { return ""; }
   
