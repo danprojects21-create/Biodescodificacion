@@ -2,36 +2,36 @@ import React, { useState } from 'react';
 
 const LiveSession: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
-  const [transcriptions, setTranscriptions] = useState<string[]>([]);
+  const [status, setStatus] = useState<string>("Inactivo");
 
   const toggleSession = async () => {
     try {
       if (!isActive) {
         await navigator.mediaDevices.getUserMedia({ audio: true });
         setIsActive(true);
-        setTranscriptions(prev => [...prev, "Micrófono conectado..."]);
+        setStatus("Escuchando...");
       } else {
         setIsActive(false);
+        setStatus("Inactivo");
       }
     } catch (err) {
-      alert("Error al acceder al micrófono");
+      alert("Se requiere permiso de micrófono");
     }
   };
 
   return (
-    <div className="p-8 bg-slate-900 rounded-3xl text-white text-center">
-      <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${isActive ? 'bg-teal-500 animate-pulse' : 'bg-slate-700'}`}>
-        {isActive ? '🎙️' : '💤'}
+    <div className="p-8 bg-slate-900 rounded-[2rem] text-white text-center shadow-2xl">
+      <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 transition-all ${isActive ? 'bg-teal-500 animate-pulse' : 'bg-slate-700'}`}>
+        <span className="text-4xl">{isActive ? '🎙️' : '💤'}</span>
       </div>
+      <h3 className="text-xl font-bold mb-2">Sesión de Voz</h3>
+      <p className="text-slate-400 mb-6 text-sm">{status}</p>
       <button 
         onClick={toggleSession}
-        className={`px-6 py-2 rounded-full font-bold ${isActive ? 'bg-red-500' : 'bg-teal-600'}`}
+        className={`px-10 py-3 rounded-full font-bold transition-all ${isActive ? 'bg-red-500' : 'bg-white text-slate-900'}`}
       >
-        {isActive ? 'Detener Sesión' : 'Iniciar Voz'}
+        {isActive ? 'Finalizar' : 'Comenzar'}
       </button>
-      <div className="mt-4 text-sm text-slate-400">
-        {transcriptions.map((t, i) => <p key={i}>{t}</p>)}
-      </div>
     </div>
   );
 };
