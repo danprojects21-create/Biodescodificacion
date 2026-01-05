@@ -1,39 +1,24 @@
-import React, { useState } from 'react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const LiveSession: React.FC = () => {
-  const [isActive, setIsActive] = useState(false);
-  const [status, setStatus] = useState<string>("Inactivo");
+// Corregido: Uso de import.meta.env para Vite
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+const genAI = new GoogleGenerativeAI(API_KEY);
 
-  const toggleSession = async () => {
+export const gemini = {
+  async chat(message: string, history: any[] = []) {
     try {
-      if (!isActive) {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        setIsActive(true);
-        setStatus("Escuchando...");
-      } else {
-        setIsActive(false);
-        setStatus("Inactivo");
-      }
-    } catch (err) {
-      alert("Se requiere permiso de micrófono");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const chat = model.startChat({
+        history: history.map(h => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text }],
+        })),
+      });
+      const result = await chat.sendMessage(message);
+      return result.response.text();
+    } catch (error) {
+      console.error("Error:", error);
+      return "Lo siento, hubo un error de conexión.";
     }
-  };
-
-  return (
-    <div className="p-8 bg-slate-900 rounded-[2rem] text-white text-center shadow-2xl">
-      <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 transition-all ${isActive ? 'bg-teal-500 animate-pulse' : 'bg-slate-700'}`}>
-        <span className="text-4xl">{isActive ? '🎙️' : '💤'}</span>
-      </div>
-      <h3 className="text-xl font-bold mb-2">Sesión de Voz</h3>
-      <p className="text-slate-400 mb-6 text-sm">{status}</p>
-      <button 
-        onClick={toggleSession}
-        className={`px-10 py-3 rounded-full font-bold transition-all ${isActive ? 'bg-red-500' : 'bg-white text-slate-900'}`}
-      >
-        {isActive ? 'Finalizar' : 'Comenzar'}
-      </button>
-    </div>
-  );
+  }
 };
-
-export default LiveSession;
