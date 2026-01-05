@@ -2,35 +2,27 @@ import React, { useState } from 'react';
 
 const LiveSession: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
-  const [status, setStatus] = useState<string>("Inactivo");
 
   const toggleSession = async () => {
     try {
       if (!isActive) {
         await navigator.mediaDevices.getUserMedia({ audio: true });
         setIsActive(true);
-        setStatus("Sesión iniciada...");
       } else {
         setIsActive(false);
-        setStatus("Inactivo");
       }
     } catch (err) {
-      alert("No se pudo acceder al micrófono.");
+      alert("Permiso de micrófono denegado");
     }
   };
 
   return (
-    <div className="p-10 bg-slate-900 rounded-[2.5rem] text-white text-center shadow-2xl border border-white/10">
-      <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 transition-all duration-500 ${isActive ? 'bg-teal-500 shadow-[0_0_30px_rgba(20,184,166,0.5)]' : 'bg-slate-800'}`}>
-        <span className="text-4xl">{isActive ? '🎙️' : '💤'}</span>
+    <div className="p-8 bg-slate-900 rounded-3xl text-white text-center">
+      <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${isActive ? 'bg-teal-500 animate-pulse' : 'bg-slate-700'}`}>
+        <span className="text-3xl">{isActive ? '🎙️' : '💤'}</span>
       </div>
-      <h3 className="text-2xl font-bold mb-2">Acompañamiento por Voz</h3>
-      <p className="text-slate-400 mb-8">{status}</p>
-      <button 
-        onClick={toggleSession}
-        className={`px-12 py-4 rounded-full font-bold transition-all ${isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-white text-slate-950 hover:bg-teal-50'}`}
-      >
-        {isActive ? 'Finalizar Encuentro' : 'Iniciar Encuentro'}
+      <button onClick={toggleSession} className={`px-8 py-2 rounded-full font-bold ${isActive ? 'bg-red-500' : 'bg-teal-600'}`}>
+        {isActive ? 'Detener Voz' : 'Iniciar Voz'}
       </button>
     </div>
   );
