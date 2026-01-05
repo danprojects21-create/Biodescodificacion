@@ -1,16 +1,16 @@
 
-import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  private getAI() {
+    // Se instancia siempre una nueva versión para capturar el estado más reciente de la API KEY
+    return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   }
 
   async chat(message: string, history: any[] = []) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: [
         ...history,
@@ -26,7 +26,8 @@ export class GeminiService {
   }
 
   async generateSymbolicImage(prompt: string, aspectRatio: string = "1:1", imageSize: string = "1K") {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
       contents: {
         parts: [{ text: `A symbolic, artistic representation of: ${prompt}. Minimalist, healing, professional, conceptual art style.` }],
@@ -48,7 +49,8 @@ export class GeminiService {
   }
 
   async generateMeditativeVideo(prompt: string, ratio: "16:9" | "9:16" = "16:9") {
-    let operation = await this.ai.models.generateVideos({
+    const ai = this.getAI();
+    let operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
       prompt: `Cinematic meditative video of ${prompt}. Slow movement, calm, high quality.`,
       config: {
@@ -60,17 +62,19 @@ export class GeminiService {
 
     while (!operation.done) {
       await new Promise(resolve => setTimeout(resolve, 10000));
-      operation = await this.ai.operations.getVideosOperation({ operation: operation });
+      operation = await ai.operations.getVideosOperation({ operation: operation });
     }
 
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+    // Adjuntamos la clave para la descarga segura desde los servidores de generación
     const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     const blob = await response.blob();
     return URL.createObjectURL(blob);
   }
 
   async generateTTS(text: string) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: `Lee pausadamente y con calidez: ${text}` }] }],
       config: {

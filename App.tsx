@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatInterface from './components/ChatInterface';
 import LiveSession from './components/LiveSession';
 import CreativeTools from './components/CreativeTools';
@@ -32,25 +32,18 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-12">
-          {[
-            { 
-              title: "Exploración Profunda", 
-              desc: "Descubre los significados ocultos tras tus procesos corporales.",
-              img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=400" 
-            },
-            { 
-              title: "Encuentro por Voz", 
-              desc: "Diálogos fluidos y empáticos en tiempo real.",
-              img: "https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&q=80&w=400"
-            }
-          ].map((card, i) => (
-            <div key={i} className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 flex items-start space-x-4 hover:bg-white/10 transition-all cursor-default">
-              <div className="flex-1">
-                <h3 className="text-white font-bold mb-1">{card.title}</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">{card.desc}</p>
-              </div>
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 flex items-start space-x-4 hover:bg-white/10 transition-all cursor-default">
+            <div className="flex-1">
+              <h3 className="text-white font-bold mb-1">Exploración Profunda</h3>
+              <p className="text-slate-300 text-sm leading-relaxed">Descubre los significados ocultos tras tus procesos corporales.</p>
             </div>
-          ))}
+          </div>
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 flex items-start space-x-4 hover:bg-white/10 transition-all cursor-default">
+            <div className="flex-1">
+              <h3 className="text-white font-bold mb-1">Encuentro por Voz</h3>
+              <p className="text-slate-300 text-sm leading-relaxed">Diálogos fluidos y empáticos en tiempo real.</p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col items-center space-y-6 w-full">
@@ -79,6 +72,27 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 const App: React.FC = () => {
   const [view, setView] = useState<ViewMode>(ViewMode.CHAT);
   const [showIntro, setShowIntro] = useState(true);
+  const [hasKey, setHasKey] = useState(false);
+
+  useEffect(() => {
+    const checkKey = async () => {
+      if (window.aistudio?.hasSelectedApiKey) {
+        const selected = await window.aistudio.hasSelectedApiKey();
+        setHasKey(selected);
+      } else {
+        // Si no estamos en el entorno de AI Studio, asumimos que se usa la env var de Vercel
+        setHasKey(!!process.env.API_KEY);
+      }
+    };
+    checkKey();
+  }, []);
+
+  const handleOpenKeySelector = async () => {
+    if (window.aistudio?.openSelectKey) {
+      await window.aistudio.openSelectKey();
+      setHasKey(true);
+    }
+  };
 
   if (showIntro) {
     return <IntroScreen onStart={() => setShowIntro(false)} />;
@@ -99,24 +113,38 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        <nav className="hidden md:flex space-x-1 bg-slate-100 p-1 rounded-full border border-slate-200">
-          {[
-            { id: ViewMode.CHAT, label: 'Exploración' },
-            { id: ViewMode.LIVE, label: 'Voz' },
-            { id: ViewMode.CREATIVE, label: 'Arte' }
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                view === item.id 
-                ? 'bg-white text-teal-800 shadow-sm' 
-                : 'text-slate-500 hover:text-slate-800'
-              }`}
+        <nav className="hidden md:flex items-center space-x-4">
+          <div className="flex space-x-1 bg-slate-100 p-1 rounded-full border border-slate-200">
+            {[
+              { id: ViewMode.CHAT, label: 'Exploración' },
+              { id: ViewMode.LIVE, label: 'Voz' },
+              { id: ViewMode.CREATIVE, label: 'Arte' }
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => setView(item.id)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                  view === item.id 
+                  ? 'bg-white text-teal-800 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          
+          {window.aistudio && (
+            <button 
+              onClick={handleOpenKeySelector}
+              className={`p-2 rounded-full transition-colors ${hasKey ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50 animate-pulse'}`}
+              title={hasKey ? "Clave configurada" : "Configurar Clave de Generación"}
             >
-              {item.label}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
             </button>
-          ))}
+          )}
         </nav>
       </header>
 
@@ -130,12 +158,15 @@ const App: React.FC = () => {
 
       <nav className="md:hidden bg-white/90 backdrop-blur-lg border-t border-slate-200 px-4 py-3 flex justify-around items-center sticky bottom-0 z-50">
         <button onClick={() => setView(ViewMode.CHAT)} className={`flex flex-col items-center transition-colors ${view === ViewMode.CHAT ? 'text-teal-600' : 'text-slate-400'}`}>
-          <span className="text-[10px] font-bold uppercase">Explorar</span>
+          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span className="text-[10px] font-bold uppercase">Chat</span>
         </button>
         <button onClick={() => setView(ViewMode.LIVE)} className={`flex flex-col items-center transition-colors ${view === ViewMode.LIVE ? 'text-teal-600' : 'text-slate-400'}`}>
+          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           <span className="text-[10px] font-bold uppercase">Voz</span>
         </button>
         <button onClick={() => setView(ViewMode.CREATIVE)} className={`flex flex-col items-center transition-colors ${view === ViewMode.CREATIVE ? 'text-teal-600' : 'text-slate-400'}`}>
+          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           <span className="text-[10px] font-bold uppercase">Arte</span>
         </button>
       </nav>
