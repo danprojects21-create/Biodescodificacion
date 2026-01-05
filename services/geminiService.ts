@@ -1,11 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { SYSTEM_INSTRUCTION } from "../constants";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Usamos el método correcto para Vite/Vercel
+    // Vite usa import.meta.env en lugar de process.env
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
@@ -14,16 +13,20 @@ export class GeminiService {
     try {
       const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const chatSession = model.startChat({
-        history: history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
+        history: history.map(h => ({ 
+          role: h.role === 'user' ? 'user' : 'model', 
+          parts: [{ text: h.text }] 
+        })),
       });
       const result = await chatSession.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      return "Hubo un error de conexión.";
+      console.error(error);
+      return "Lo siento, hubo un error de conexión.";
     }
   }
 
-  // Estas funciones evitan que falle el build de CreativeTools
+  // Funciones necesarias para que CreativeTools no falle
   async generateSymbolicImage(prompt: string) { return ""; }
   async generateMeditativeVideo(prompt: string) { return ""; }
   
