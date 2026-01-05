@@ -16,8 +16,7 @@ export const gemini = {
       const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      console.error("Error en Gemini:", error);
-      return "Hubo un problema de conexión. Intenta describir tu emoción nuevamente.";
+      return "Hubo un problema de conexión. Intenta de nuevo.";
     }
   }
 };
