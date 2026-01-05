@@ -17,7 +17,7 @@ export const gemini = {
       const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      return "Lo siento, hubo un error de conexión.";
+      return "Hubo un error de conexión.";
     }
   },
 
@@ -30,7 +30,7 @@ export const gemini = {
     }
   },
 
-  // Funciones temporales para evitar errores de compilación
+  // Funciones para que el programa no de error al buscar imágenes o videos
   async generateSymbolicImage(p: string) { return ""; },
   async generateMeditativeVideo(p: string) { return ""; }
 };
