@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
+// @ts-ignore
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const gemini = {
   async chat(message: string, history: any[] = []) {
@@ -15,7 +17,7 @@ export const gemini = {
       const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      return "Hubo un error de conexión.";
+      return "Error de conexión.";
     }
   },
 
@@ -28,14 +30,7 @@ export const gemini = {
     }
   },
 
-  // Añadimos estas funciones para que CreativeTools no de error
-  async generateSymbolicImage(prompt: string) {
-    console.log("Generando imagen para:", prompt);
-    return "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800"; 
-  },
-
-  async generateMeditativeVideo(prompt: string) {
-    console.log("Generando video para:", prompt);
-    return "https://www.w3schools.com/html/mov_bbb.mp4";
-  }
+  // Funciones vacías para que el programa no de error al compilar
+  async generateSymbolicImage(prompt: string) { return ""; },
+  async generateMeditativeVideo(prompt: string) { return ""; }
 };
