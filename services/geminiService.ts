@@ -9,20 +9,20 @@ export const gemini = {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const chat = model.startChat({
-        history: history.map(h => ({
+        history: (history || []).map(h => ({
           role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: h.text }],
+          parts: [{ text: String(h.text || h) }],
         })),
       });
       const result = await chat.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      return "Error de conexión.";
+      return "Lo siento, hubo un error de conexión.";
     }
   },
 
   async generateTTS(text: string) {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
@@ -30,7 +30,7 @@ export const gemini = {
     }
   },
 
-  // Funciones vacías para que el programa no de error al compilar
-  async generateSymbolicImage(prompt: string) { return ""; },
-  async generateMeditativeVideo(prompt: string) { return ""; }
+  // Funciones añadidas para que los otros archivos no den error
+  async generateSymbolicImage(p: string) { return ""; },
+  async generateMeditativeVideo(p: string) { return ""; }
 };
