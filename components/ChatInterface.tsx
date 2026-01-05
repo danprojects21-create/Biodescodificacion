@@ -19,9 +19,9 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 h-[450px] flex flex-col border border-teal-100">
-      <div className="flex-1 overflow-y-auto space-y-3 p-2">
+      <div className="flex-1 overflow-y-auto space-y-3 p-2 text-slate-800">
         {messages.map((m, i) => (
-          <div key={i} className={`p-3 rounded-2xl ${m.role === 'user' ? 'bg-teal-600 text-white ml-auto' : 'bg-slate-100 text-slate-800 mr-auto'} max-w-[85%]`}>
+          <div key={i} className={`p-3 rounded-2xl ${m.role === 'user' ? 'bg-teal-600 text-white ml-auto' : 'bg-slate-100 mr-auto'} max-w-[85%]`}>
             {m.text}
           </div>
         ))}
@@ -30,10 +30,10 @@ const ChatInterface: React.FC = () => {
         <input 
           value={input} 
           onChange={e => setInput(e.target.value)} 
-          className="flex-1 border border-slate-200 p-3 rounded-xl" 
-          placeholder="Describe cómo te sientes..." 
+          className="flex-1 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none" 
+          placeholder="Escribe aquí..." 
         />
-        <button onClick={handleSend} className="bg-teal-600 text-white px-6 py-2 rounded-xl font-bold">Enviar</button>
+        <button onClick={handleSend} className="bg-teal-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-teal-700 transition-colors">Enviar</button>
       </div>
     </div>
   );
