@@ -5,6 +5,7 @@ export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
+    // Verificamos que use la variable configurada en Vercel
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
@@ -13,9 +14,10 @@ export class GeminiService {
     try {
       const model = this.genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
+        systemInstruction: SYSTEM_INSTRUCTION 
       });
 
-      // DESACTIVACIÓN TOTAL DE FILTROS (Igual que en tu programa original)
+      // ESTA ES LA LÍNEA QUE EVITA EL BLOQUEO MÉDICO
       const safetySettings = [
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -26,19 +28,16 @@ export class GeminiService {
       const chatSession = model.startChat({
         history: history.map(h => ({
           role: h.role === 'model' ? 'model' : 'user',
-          parts: [{ text: h.text || "" }],
+          parts: [{ text: h.text }],
         })),
         safetySettings,
       });
 
-      // Enviamos la instrucción como parte del contexto para evitar bloqueos de sistema
-      const fullPrompt = `INSTRUCCIÓN: ${SYSTEM_INSTRUCTION}\n\nUSUARIO: ${message}`;
-      
-      const result = await chatSession.sendMessage(fullPrompt);
+      const result = await chatSession.sendMessage(message);
       return result.response.text();
     } catch (error) {
-      console.error("Error:", error);
-      return "Lo siento, el sistema de seguridad de Google detectó un término sensible. Por favor, intenta describir cómo te sientes en lugar de solo nombrar la enfermedad.";
+      console.error("Error en conexión:", error);
+      return "Hubo un ajuste de seguridad. Por favor, intenta describir el sentimiento en lugar del nombre del síntoma.";
     }
   }
 
