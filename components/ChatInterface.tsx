@@ -30,7 +30,7 @@ const ChatInterface: React.FC = () => {
         <input 
           value={input} 
           onChange={e => setInput(e.target.value)} 
-          className="flex-1 border border-slate-200 p-3 rounded-xl focus:outline-teal-500" 
+          className="flex-1 border border-slate-200 p-3 rounded-xl" 
           placeholder="Describe cómo te sientes..." 
         />
         <button onClick={handleSend} className="bg-teal-600 text-white px-6 py-2 rounded-xl font-bold">Enviar</button>
