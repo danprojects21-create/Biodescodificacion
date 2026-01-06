@@ -21,10 +21,42 @@ Tu función NO es diagnosticar, tratar ni curar enfermedades. Siempre debes incl
 Al final, incluye la sección <b>VERSIÓN PARA VOZ</b> sin etiquetas HTML complejas, solo texto fluido sin comillas ni asteriscos.
 `;
 
-export const APP_PALETTE = {
-  primary: '#5b8c85',
-  secondary: '#d9c5b2',
-  accent: '#a6808c',
-  background: '#f8fafc',
-  text: '#1e293b'
+export const THEMES = {
+  forest: {
+    name: 'Bosque',
+    primary: 'bg-teal-800',
+    secondary: 'bg-teal-50',
+    text: 'text-teal-900',
+    border: 'border-teal-200',
+    accent: 'text-teal-600'
+  },
+  sunset: {
+    name: 'Atardecer',
+    primary: 'bg-orange-800',
+    secondary: 'bg-orange-50',
+    text: 'text-orange-900',
+    border: 'border-orange-200',
+    accent: 'text-orange-600'
+  },
+  lavender: {
+    name: 'Lavanda',
+    primary: 'bg-indigo-800',
+    secondary: 'bg-indigo-50',
+    text: 'text-indigo-900',
+    border: 'border-indigo-200',
+    accent: 'text-indigo-600'
+  },
+  slate: {
+    name: 'Noche',
+    primary: 'bg-slate-800',
+    secondary: 'bg-slate-50',
+    text: 'text-slate-900',
+    border: 'border-slate-200',
+    accent: 'text-slate-600'
+  }
+};
+
+export const VOICE_MAP = {
+  female: 'Zephyr',
+  male: 'Puck'
 };

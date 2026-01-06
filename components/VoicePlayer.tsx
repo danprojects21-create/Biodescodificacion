@@ -57,9 +57,15 @@ const VoicePlayer: React.FC<VoicePlayerProps> = ({ base64Audio, onFinished }) =>
   if (!base64Audio) return null;
 
   return (
-    <div className="flex items-center space-x-2 text-sm text-teal-600 italic">
-      <span className="animate-pulse">●</span>
-      <span>{isPlaying ? 'Escuchando versión voz...' : 'Audio finalizado'}</span>
+    <div className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-teal-100 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="flex space-x-1">
+        <span className="w-1 h-3 bg-teal-500 rounded-full animate-[pulse_1s_infinite]"></span>
+        <span className="w-1 h-3 bg-teal-400 rounded-full animate-[pulse_1.2s_infinite]"></span>
+        <span className="w-1 h-3 bg-teal-300 rounded-full animate-[pulse_0.8s_infinite]"></span>
+      </div>
+      <span className="text-xs font-bold text-teal-800 uppercase tracking-widest">
+        {isPlaying ? 'Escuchando Voz...' : 'Voz Finalizada'}
+      </span>
     </div>
   );
 };

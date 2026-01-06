@@ -6,12 +6,22 @@ export enum ViewMode {
   HISTORY = 'HISTORY'
 }
 
+export type VoiceType = 'female' | 'male';
+
+export interface AppSettings {
+  voice: VoiceType;
+  autoPlay: boolean;
+  theme: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
   timestamp: Date;
   isThinking?: boolean;
+  // Added grounding field to store Search Grounding citations
+  grounding?: any[];
 }
 
 export interface SymbolicMedia {
