@@ -7,7 +7,6 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const gemini = {
   async chat(message: string, history: any[] = []) {
     try {
-      if (!API_KEY) return "Falta la clave API en Vercel.";
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const chat = model.startChat({
         history: (history || []).map(h => ({
@@ -16,13 +15,11 @@ export const gemini = {
         })),
       });
       const result = await chat.sendMessage(message);
-      const responseText = result.response.text();
-      
-      // Activa la voz automáticamente
-      this.generateTTS(responseText);
-      return responseText;
+      const text = result.response.text();
+      this.generateTTS(text); // Activa la voz
+      return text;
     } catch (error) {
-      return "Error de conexión. Revisa tu clave API en Vercel.";
+      return "Error de conexión. Revisa tu clave API.";
     }
   },
 
@@ -34,7 +31,7 @@ export const gemini = {
       window.speechSynthesis.speak(utterance);
     }
   },
-  // Funciones de apoyo para evitar errores en otros componentes
-  async generateSymbolicImage(p: string) { return ""; },
-  async generateMeditativeVideo(p: string) { return ""; }
+
+  async generateSymbolicImage(prompt: string) { return ""; },
+  async generateMeditativeVideo(prompt: string) { return ""; }
 };
